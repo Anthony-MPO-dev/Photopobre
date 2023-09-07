@@ -1,5 +1,5 @@
 # PhotoPobre 2.0
-O Fotoshope de pobre | programa criado para processamento de imagens simples 
+O Photoshop de pobre | programa criado para processamento de imagens simples 
 
 
 
