@@ -45,7 +45,7 @@ def eventos():
 
             elif event == 'Reset imagem':
                 if image_path:
-                    img_bytes = reset_image()
+                    img, img_bytes = reset_image()
 
                     window['-IMAGE-'].update(data=img_bytes)
             
