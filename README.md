@@ -1,5 +1,8 @@
 # PhotoPobre 2.0
-O Photoshop de pobre | programa criado para processamento de imagens simples 
+O Fotoshope de pobre | programa criado para processamento de imagens simples 
+
+### Por: Anthony Muniz Prado de Oliveira
+### RGA: 202011722003
 
 
 

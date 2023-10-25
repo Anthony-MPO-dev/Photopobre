@@ -151,7 +151,7 @@ def eventos():
                     
                     window['-IMAGE-'].update(data=img_bytes)
 
-            # GAMME E LIMIARIZAR
+            # GAMMA E LIMIARIZAR
 
             elif event == 'GAMMA':
                 if image_path:
@@ -202,6 +202,21 @@ def eventos():
                     img_bytes = filtro_sobel(img)
 
                     window['-IMAGE-'].update(data=img_bytes)
+
+            # Algoritmo de CANNY
+
+            elif event == 'Canny':
+                if image_path:
+                    img_bytes, img_scaled = Canny(img)
+
+                    window['-IMAGE-'].update(data=img_bytes)
+
+            # Hough
+
+            elif event == 'Hough Circulos e Elipses':
+                img_bytes, img_scaled = Hough_circles(img)
+
+                window['-IMAGE-'].update(data=img_bytes)
 
     # Certifique-se de fechar todas as janelas antes de sair
     if zoom_slider_window:

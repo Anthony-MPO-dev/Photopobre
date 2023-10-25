@@ -26,11 +26,11 @@ def main_window():
     x_pos = (screen_width - window_width) // 2
     y_pos = (screen_height - window_height) // 2
 
-    sg.theme('DarkAmber')
+    sg.theme('DarkBlue1')
 
     # Defina o layout da janela
     layout = [
-        [sg.Menu([['Arquivo', ['Carregar Imagem', 'Desfazer', 'Salvar', 'Salvar como', 'Confirmar alterações', 'Reset imagem']], ['Transformações de Intensidade', ['Negativa', 'Monocromática','Correções de Contrastes', ['Logarítimica', 'Exponencial', 'GAMMA', 'Limiarizar'], 'Histograma', ['Equalização de hist.', 'Especificação de hist.', 'Hist. Monocromatico', 'Hist. Mult. Canais RGB'], 'Ajustar Brilho']],['Reamostragem', ['Zoom +', 'Zoom -', 'Ferramentas', ['Ajustar Zoom']]], ['Filtros Espaciais', ['Filtros Passa-Baixa',['Filtro Box', 'Filtro Gaussiano', 'Filtro da Mediana'], 'Filtros Passa-Alta', ['Aguçamento Laplaciano', 'Aguçamento de Sobel']]]])],
+        [sg.Menu([['Arquivo', ['Carregar Imagem', 'Desfazer', 'Salvar', 'Salvar como', 'Confirmar alterações', 'Reset imagem']], ['Transformações de Intensidade', ['Negativa', 'Monocromática','Correções de Contrastes', ['Logarítimica', 'Exponencial', 'GAMMA', 'Limiarizar'], 'Histograma', ['Equalização de hist.', 'Especificação de hist.', 'Hist. Monocromatico', 'Hist. Mult. Canais RGB'], 'Ajustar Brilho']],['Reamostragem', ['Zoom +', 'Zoom -', 'Ferramentas', ['Ajustar Zoom']]], ['Filtros Espaciais', ['Filtros Passa-Baixa',['Filtro Box', 'Filtro Gaussiano', 'Filtro da Mediana'], 'Bordas, Contornos e Aguçamento', ['Canny', 'Encontrar Formas', ['Hough Circulos e Elipses'],'Filtros Passa-Alta', ['Aguçamento Laplaciano', 'Aguçamento de Sobel']]]]])],
         [sg.Image(key='-IMAGE-')],  # Local onde a imagem será exibida
     ]
 
@@ -165,5 +165,17 @@ def create_filtro_window(title, text):
     ]
 
     return sg.Window(title, layout, finalize=True)
+
+
+# Função para criar janela de personalização do filtro
+def create_custom_filter_window():
+    layout = []
+    for i in range(3):
+        row = []
+        for j in range(3):
+            row.append(sg.InputText(default_text='0', key=f'Gx_{i}_{j}'))
+        layout.append(row)
+    layout.append([sg.Button('Aplicar Filtro Personalizado'), sg.Button('Cancelar')])
+    return sg.Window('Filtro Personalizado', layout, finalize=True)
 
 

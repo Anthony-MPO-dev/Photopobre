@@ -711,3 +711,148 @@ def filtro_sobel(img):
             img_bytes = cv2.imencode('.png', img_scaled)[1].tobytes()
 
             return img_bytes
+        
+def Canny(image):
+
+    global img_scaled
+
+    # Verificar se a imagem já está em escala de cinza
+    if len(image.shape) == 3 and image.shape[2] == 3:
+        # Converter a imagem para escala de cinza
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        pass
+
+    window_gauss = create_filtro_window('Filtro Gaussiano - Tamanho do Kernel', 'Tamanho do Kernel para Filtro Gaussiano:')
+
+    tamanho_kernel = while_window_open(window_gauss)
+
+    if tamanho_kernel is 0:
+        img_scaled = image
+        
+    else:
+
+        # Aplique o filtro Gaussiano separável à imagem
+        img_scaled = cv2.GaussianBlur(image, (tamanho_kernel, tamanho_kernel), 0) # terceiro parametro 0 ira definir o melhor valor de sigma para o tamanho do kernel
+
+    # Defina a lista de opções de filtro
+    filtro_options = ['Sobel', 'Scharr', 'Roberts', 'Prewitt']
+
+    # Crie a janela principal com opções de filtro
+    layout = [
+        [sg.Text('Escolha o filtro:')],
+        [sg.Combo(filtro_options, key='-FILTRO-')],
+        [sg.Button('Aplicar Filtro')],[sg.Button('Cancelar')]
+    ]
+
+    window = sg.Window('Escolha do Filtro', layout, finalize=True)
+
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED or event == 'Cancelar':
+            break
+        elif event == 'Aplicar Filtro':
+            filtro = values['-FILTRO-']
+            break
+
+    window.close()
+
+    if filtro == 'Sobel':
+        # Aplicar filtro de Sobel
+        sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float32)
+        sobel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=np.float32)
+        gradient_x = cv2.filter2D(image, -1, sobel_x)
+        gradient_y = cv2.filter2D(image, -1, sobel_y)
+        gradient_magnitude = np.sqrt(gradient_x ** 2 + gradient_y ** 2)
+
+    elif filtro == 'Scharr':
+        # Aplicar filtro de Scharr
+        scharr_x = np.array([[-3, 0, 3], [-10, 0, 10], [-3, 0, 3]], dtype=np.float32)
+        scharr_y = np.array([[-3, -10, -3], [0, 0, 0], [3, 10, 3]], dtype=np.float32)
+        gradient_x = cv2.filter2D(image, -1, scharr_x)
+        gradient_y = cv2.filter2D(image, -1, scharr_y)
+        gradient_magnitude = np.sqrt(gradient_x ** 2 + gradient_y ** 2)
+
+    elif filtro == 'Roberts':
+        # Aplicar filtro de Roberts
+        roberts_x = np.array([[1, 0], [0, -1]], dtype=np.float32)
+        roberts_y = np.array([[0, 1], [-1, 0]], dtype=np.float32)
+        gradient_x = cv2.filter2D(image, -1, roberts_x)
+        gradient_y = cv2.filter2D(image, -1, roberts_y)
+        gradient_magnitude = np.sqrt(gradient_x ** 2 + gradient_y ** 2)
+
+    elif filtro == 'Prewitt':
+        # Aplicar filtro de Prewitt
+        prewitt_x = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], dtype=np.float32)
+        prewitt_y = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]], dtype=np.float32)
+        gradient_x = cv2.filter2D(image, -1, prewitt_x)
+        gradient_y = cv2.filter2D(image, -1, prewitt_y)
+        gradient_magnitude = np.sqrt(gradient_x ** 2 + gradient_y ** 2)
+
+    # Determine os limiares com base na magnitude do gradiente
+    threshold1 = 0.8* gradient_magnitude.max()  # Defina um valor adequado
+    threshold2 = gradient_magnitude.max()  # Defina um valor adequado
+
+    # Aplique o algoritmo de Canny com base nos limiares de gradientes
+    img_scaled = cv2.Canny(img_scaled, threshold1, threshold2)
+
+    img_scaled = img_scaled.astype(np.uint8)
+
+    img_bytes = cv2.imencode('.png', img_scaled)[1].tobytes()
+
+    return img_bytes, img_scaled
+
+def Hough_circles(image):
+
+    global img_scaled
+
+    # Função para criar a janela de configuração do tamanho das elipses
+    def create_size_range_window():
+        layout = [
+            [sg.Text('Tamanho Mínimo:'), sg.InputText(key='-MIN-', size=(5, 1))],
+            [sg.Text('Tamanho Máximo:'), sg.InputText(key='-MAX-', size=(5, 1))],
+            [sg.Button('Aplicar'), sg.Button('Cancelar')]
+        ]
+
+        return sg.Window('Intervalo de Tamanho das Elipses', layout, finalize=True)
+
+    img_bytes, img_scaled = Canny(image)
+
+    # Criar janela para configurar o tamanho das elipses
+    size_range_window = create_size_range_window()
+        
+    while True:
+        event, values = size_range_window.read()
+        if event in (sg.WIN_CLOSED, 'Cancelar'):
+            break
+        elif event == 'Aplicar':
+            min_size = int(values['-MIN-'])
+            max_size = int(values['-MAX-'])
+            
+            # Detectar as elipses usando a transformada de Hough
+            elipses = cv2.HoughCircles(
+                img_scaled,
+                cv2.HOUGH_GRADIENT,
+                dp=1, minDist=10,
+                param1=50, param2=30,
+                minRadius=min_size, maxRadius=max_size
+            )
+
+            if elipses is not None:
+                elipses = np.uint16(np.around(elipses))
+                for ellipse in elipses[0, :]:
+                    x, y = ellipse[0], ellipse[1]
+                    major_axis = ellipse[2]
+                    minor_axis = major_axis
+                    
+                    # Desenhar a elipse
+                    cv2.ellipse(image, (x, y), (major_axis, minor_axis), 0, 0, 360, (0, 0, 255), 2)
+            break
+    
+    size_range_window.close()
+    
+    img_scaled = image.astype(np.uint8)
+
+    img_bytes = cv2.imencode('.png', img_scaled)[1].tobytes()
+
+    return img_bytes, img_scaled
