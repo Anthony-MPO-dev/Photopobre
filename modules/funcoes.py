@@ -833,7 +833,8 @@ def Hough_circles(image):
             elipses = cv2.HoughCircles(
                 img_scaled,
                 cv2.HOUGH_GRADIENT,
-                dp=1, minDist=10,
+                dp=1, 
+                minDist=max_size, #Distancia minima entre o centro dos circulos
                 param1=50, param2=30,
                 minRadius=min_size, maxRadius=max_size
             )
